@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!--
+  CompSapientMechReactiveArmor.cs doesn't exist on either ThingDef natively - it's a
+  new feature, not a regression fix - so it has to be added here first before
+  HumanlikeAnimalSettings_MechQueens.xml's compWhitelist can let it survive into the
+  sapient clone. The comp self-gates to sapient-only at runtime (see IsActive), so its
+  presence on the non-sapient originals is harmless.
+  -->
+
+  <Operation Class="PatchOperationAdd" MayRequire="Ludeon.RimWorld.Biotech">
+    <xpath>Defs/ThingDef[defName="Mech_Warqueen"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SapientMechReactiveArmor" />
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd" MayRequire="Veltaris.Mechqueen">
+    <xpath>Defs/ThingDef[defName="AV_Mech_Workerqueen"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SapientMechReactiveArmor" />
+    </value>
+  </Operation>
+
+  <!--
+  Second, separate reactive-armor mechanic - ported from Glitterworld Destroyer 5's
+  CompHitArmor/GD_HitArmor (see CompSapientMechHitArmor.cs and
+  Hediffs_ReactiveArmor.xml): charge-limited full immunity for a short time after each
+  hit, recharging via repair. Runs alongside CompProperties_SapientMechReactiveArmor
+  above rather than replacing it, per explicit instruction - the two are independent
+  comps with no shared state. Same duration (60 ticks) and charge count (15) GD5 uses
+  for the War Queen; there's no equivalent source value for the Work Queen since GD5
+  doesn't touch AV Framework at all, so the same numbers are reused there too.
+  -->
+
+  <Operation Class="PatchOperationAdd" MayRequire="Ludeon.RimWorld.Biotech">
+    <xpath>Defs/ThingDef[defName="Mech_Warqueen"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SapientMechHitArmor">
+        <hediffToAdd>SapientMechanoidFix_ReactiveArmor</hediffToAdd>
+        <duration>60</duration>
+        <limitOfTimes>15</limitOfTimes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd" MayRequire="Veltaris.Mechqueen">
+    <xpath>Defs/ThingDef[defName="AV_Mech_Workerqueen"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SapientMechHitArmor">
+        <hediffToAdd>SapientMechanoidFix_ReactiveArmor</hediffToAdd>
+        <duration>60</duration>
+        <limitOfTimes>15</limitOfTimes>
+      </li>
+    </value>
+  </Operation>
+
+</Patch>

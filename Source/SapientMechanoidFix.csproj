@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <OutputPath>..\Assemblies</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+  </ItemGroup>
+
+  <!-- Adjust RimWorldPath to match your install location. -->
+  <PropertyGroup>
+    <RimWorldPath>C:\Games\Rimworld</RimWorldPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(RimWorldPath)\Mods\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BigAndSmall">
+      <HintPath>$(RimWorldPath)\Mods\2925432336\1.6\Base\Assemblies\BigAndSmall.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- AV Framework (Work Queen) is an optional/soft dependency - deliberately NOT
+         referenced here. All AV Framework interop is done purely via reflection
+         (AccessTools.TypeByName + Traverse) in OverseerGizmoSuppressionPatches.cs,
+         manually attached from HarmonyInit.cs only after confirming the types resolve
+         at runtime. A compile-time reference would put AV Framework types in a
+         Harmony-discovered method signature, which risks reflection failures across
+         the whole assembly (including our vanilla-only patches) when AV Framework
+         isn't installed. -->
+  </ItemGroup>
+
+</Project>

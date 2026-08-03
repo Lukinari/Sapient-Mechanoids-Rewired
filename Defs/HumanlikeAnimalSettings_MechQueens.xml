@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!--
+  Big and Small's humanlike-ThingDef generator (HumanlikeAnimalGenerator.GenerateAndRegisterHumanlikeAnimal)
+  filters every comp on the original animal/mechanoid ThingDef against the merged
+  compWhitelist/tabWhitelist/modExtensionWhitelist of every loaded HumanlikeAnimalSettings
+  def - anything not listed is silently dropped when it builds the sapient version's
+  ThingDef. It ships its own DefaultHumanlikeAnimalSettings (see Big and Small's own
+  Defs/Presets/PawnExtensionPresets/HumanlikeAnimalGenerator.xml) covering vanilla/VEF
+  comps, but doesn't know about mech-queen-style "carrier" comps, so a sapient Work
+  Queen ([AV] Framework) or War Queen (vanilla Biotech) loses its steel reserve and
+  urchin-release gizmo entirely - the comps backing them just never make it onto the
+  generated ThingDef in the first place. All HumanlikeAnimalSettings defs get merged
+  together (see HumanlikeAnimalSettings.AllHASettings), so this only needs to add the
+  missing entries, not touch Big and Small's own def.
+
+  Vanilla's War Queen (Mech_Warqueen, Races_Mechanoids_SuperHeavy.xml) combines both
+  the steel reserve and the urchin spawning into one CompProperties_MechCarrier.
+  [AV] Framework's Work Queen splits the same idea across two comps instead:
+  CompProperties_MechReloadableResourceHolder (the reserve) and
+  CompProperties_MechCarrierChoice (the release gizmo, letting the player pick which
+  urchin type to spawn rather than always the same one).
+
+  Whitelisting the comps only gets them back onto the pawn - it doesn't make their
+  gizmos visible again on its own. Both RimWorld.CompMechCarrier and
+  AV_Framework.CompMechCarrierChoice/CompMechReloadableResourceHolder additionally gate
+  their CompGetGizmosExtra on pawn.IsColonyMech, which Big and Small deliberately clears
+  for every sapient mechanoid - see Pawn_IsColonyMech_Patch.cs for that half of the fix.
+  -->
+  <BigAndSmall.HumanlikeAnimalSettings>
+    <defName>SapientMechanoidFix_MechQueenWhitelist</defName>
+    <compWhitelist>
+      <!-- Vanilla Biotech - War Queen -->
+      <li>RimWorld.CompProperties_MechCarrier</li>
+
+      <!-- [AV] Framework - Work Queen -->
+      <li>AV_Framework.CompProperties_MechReloadableResourceHolder</li>
+      <li>AV_Framework.CompProperties_MechCarrierChoice</li>
+
+      <!-- Vanilla Biotech - auto-repair toggle (all mechanoids). Unlike the two
+           above, this one is just a bool field with a gizmo - no lifecycle-hook fix
+           needed for the comp itself. See WorkGiver_RepairMech_HasJobOnThing_Patch.cs
+           and JobDriver_RepairMech_MakeNewToils_Patch.cs for what it actually takes
+           to make auto-repair functional for a sapient mechanoid, since vanilla's own
+           repair WorkGiver/JobDriver both assume every mechanoid has a power (energy)
+           need, which sapient mechanoids deliberately don't. -->
+      <li>RimWorld.CompProperties_MechRepairable</li>
+
+      <!-- Vanilla Biotech - War Queen's mounted turret gun (Gun_ChargeBlasterTurret).
+           Without this the sapient clone had no ranged attack at all - just its innate
+           melee "head" tool. CompTurretGun.PostPostMake() is what actually constructs
+           the gun Thing, and RaceMorpher_AddMissingComps_Patch.cs already calls
+           PostPostMake/PostSpawnSetup on every newly-added comp, so this "just works"
+           without any comp-specific patch. Its only two mechanoid-specific gates
+           (fire-at-will check, toggle-turret gizmo visibility) both key off
+           Pawn.IsColonyMechPlayerControlled, already fixed by
+           Pawn_IsColonyMechPlayerControlled_Patch.cs. -->
+      <li>RimWorld.CompProperties_TurretGun</li>
+
+      <!-- Reactive armor (steel-scaled damage reduction) - see
+           CompSapientMechReactiveArmor.cs and Patches/ReactiveArmor.xml, which is what
+           actually adds this comp to Mech_Warqueen/AV_Mech_Workerqueen in the first
+           place, since it isn't a comp either ThingDef ships with natively. -->
+      <li>SapientMechanoidFix.CompProperties_SapientMechReactiveArmor</li>
+
+      <!-- Reactive armor (charge-limited hit-triggered immunity) - see
+           CompSapientMechHitArmor.cs. Independent of the comp above; both run
+           together. -->
+      <li>SapientMechanoidFix.CompProperties_SapientMechHitArmor</li>
+
+      <!-- Glitterworld Destroyer 5 - War Queen's "kill all urchins" button. Its
+           gizmo only checks Owner.Faction == Faction.OfPlayer, no mechanoid-specific
+           gate at all, so this needs nothing beyond the whitelist entry itself. Only
+           ever present if GD5 is installed and has patched Mech_Warqueen - harmless
+           whitelist entry otherwise, since it just never matches anything. -->
+      <li>GD3.CompProperties_AllDead</li>
+
+      <!-- Glitterworld Destroyer 5 - War Queen's auto-release-urchins toggle
+           (periodically calls CompMechCarrier.TrySpawnPawns() on its own). Same
+           direct MechanitorUtility.GetOverseer(pawn) == null gizmo-visibility gate as
+           AV Framework's two comps - see OverseerGizmoSuppressionPatches.cs, which
+           reuses the exact same suppression-window fix for this comp's
+           CompGetGizmosExtra too. -->
+      <li>GD3.CompProperties_AttackMode</li>
+    </compWhitelist>
+    <tabWhitelist>
+      <li>AV_Framework.ITab_MechQueen</li>
+    </tabWhitelist>
+  </BigAndSmall.HumanlikeAnimalSettings>
+
+</Defs>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!--
+  Ports Glitterworld Destroyer 5's GD_HitArmor hediff (full damage immunity for a
+  short duration, triggered on hit) for sapient mechs - see
+  CompSapientMechHitArmor.cs, which is what actually grants/refreshes this.
+  -->
+  <HediffDef>
+    <defName>SapientMechanoidFix_ReactiveArmor</defName>
+    <label>reactive armor</label>
+    <hediffClass>HediffWithComps</hediffClass>
+    <isBad>false</isBad>
+    <everCurableByItem>false</everCurableByItem>
+    <defaultLabelColor>(0.2, 0.7, 0.8)</defaultLabelColor>
+    <description>Additional armor plating that interferes with incoming attacks for a short period after the mechanoid is damaged, briefly making it immune to further harm.</description>
+    <comps>
+      <li Class="HediffCompProperties_Disappears">
+        <showRemainingTime>True</showRemainingTime>
+      </li>
+      <li Class="HediffCompProperties_DisappearsOnDeath" />
+    </comps>
+    <stages>
+      <li>
+        <statFactors>
+          <IncomingDamageFactor>0</IncomingDamageFactor>
+        </statFactors>
+        <capMods>
+          <li>
+            <capacity>Moving</capacity>
+            <postFactor>0.9</postFactor>
+          </li>
+        </capMods>
+      </li>
+    </stages>
+  </HediffDef>
+
+</Defs>
