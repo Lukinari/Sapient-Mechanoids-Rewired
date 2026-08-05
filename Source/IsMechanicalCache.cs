@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using BigAndSmall;
+using UnityEngine;
 using Verse;
 
 namespace SapientMechanoidFix
@@ -50,21 +51,40 @@ namespace SapientMechanoidFix
     /// their mod list ever converts an organic pawn into a mechanical one can turn on
     /// SapientMechanoidFixSettings.freezeNonMechanicalCache to freeze `false` results too,
     /// permanently - the common case (most of a colony) never gets rescanned again after
-    /// its first check. Off by default, since it's a correctness tradeoff rather than a
+    /// its confirmed check. Off by default, since it's a correctness tradeoff rather than a
     /// free win.
+    ///
+    /// The very first check for any given pawn is never eligible for that freeze, even with
+    /// the setting on - a freshly-converted (or freshly-loaded, since a save load
+    /// deserializes a brand new Pawn instance with no existing cache entry) sapient
+    /// mechanoid's first-ever check landing on `false` gets one guaranteed recheck before
+    /// it can stick permanently.
+    ///
+    /// The refresh window is measured against Time.realtimeSinceStartup (real wall-clock
+    /// seconds), not Find.TickManager.TicksGame - confirmed via a real bug: TicksGame
+    /// freezes entirely while the game is paused, so a wrong `false` cached the moment
+    /// before a pause (e.g. a sapient War Queen checked a tick before Big and Small finished
+    /// attaching its mechanical-marker hediff) could never self-correct for as long as the
+    /// player stayed paused, no matter how long that was in real time - and inspecting a
+    /// pawn's gizmos to see whether a fix worked is exactly when a player is most likely to
+    /// be paused. The cache's entire purpose is bounding real per-frame CPU cost, not
+    /// simulated game time, so real time is the correct thing to gate on regardless.
     /// </summary>
     public static class IsMechanicalCache
     {
         private const int DefaultRefreshIntervalTicks = 250;
 
-        private static int RefreshIntervalTicks => SapientMechanoidFixMod.Settings?.isMechanicalCacheRefreshTicks ?? DefaultRefreshIntervalTicks;
+        private const float TicksPerSecondAt1x = 60f;
+
+        private static float RefreshIntervalSeconds => (SapientMechanoidFixMod.Settings?.isMechanicalCacheRefreshTicks ?? DefaultRefreshIntervalTicks) / TicksPerSecondAt1x;
 
         private static bool FreezeNonMechanicalCache => SapientMechanoidFixMod.Settings?.freezeNonMechanicalCache ?? false;
 
         private sealed class Entry
         {
             public bool Value;
-            public int ComputedTick;
+            public float ComputedRealTime;
+            public bool Confirmed; // Survived at least one refresh cycle - only then is a `false` freeze-eligible.
         }
 
         private static readonly ConditionalWeakTable<Pawn, Entry> Cache = new ConditionalWeakTable<Pawn, Entry>();
@@ -79,20 +99,21 @@ namespace SapientMechanoidFix
                 if (entry.Value)
                     return true; // Mechanical status doesn't revert - no need to ever re-check a confirmed `true`.
 
-                if (FreezeNonMechanicalCache)
+                if (FreezeNonMechanicalCache && entry.Confirmed)
                     return false;
 
-                int currentTick = Find.TickManager?.TicksGame ?? 0;
-                if (currentTick - entry.ComputedTick < RefreshIntervalTicks)
-                    return false;
+                float now = Time.realtimeSinceStartup;
+                if (now - entry.ComputedRealTime < RefreshIntervalSeconds)
+                    return false; // Not due for a recheck yet - including the grace period before a first `false` can freeze.
 
                 entry.Value = pawn.IsMechanical();
-                entry.ComputedTick = currentTick;
+                entry.ComputedRealTime = now;
+                entry.Confirmed = true;
                 return entry.Value;
             }
 
             bool result = pawn.IsMechanical();
-            Cache.Add(pawn, new Entry { Value = result, ComputedTick = Find.TickManager?.TicksGame ?? 0 });
+            Cache.Add(pawn, new Entry { Value = result, ComputedRealTime = Time.realtimeSinceStartup, Confirmed = false });
             return result;
         }
     }

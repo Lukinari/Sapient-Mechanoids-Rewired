@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using BigAndSmall;
 using HarmonyLib;
+using RimWorld;
 using Verse;
 
 namespace SapientMechanoidFix
@@ -16,19 +17,31 @@ namespace SapientMechanoidFix
     /// class is entirely inert, and never JIT-compiled/executed, for whichever of the
     /// two isn't installed.
     ///
-    /// Fixes a recurring pattern across three unrelated comps from two different mods:
-    /// each gates its CompGetGizmosExtra directly on
+    /// Fixes a recurring pattern across comps from three different sources (one vanilla,
+    /// two modded): each gates its CompGetGizmosExtra directly on
     /// MechanitorUtility.GetOverseer(pawn) == null, bypassing our
     /// IsColonyMechPlayerControlled fix entirely and hiding the gizmo for any sapient
     /// mech with no Overseer relation:
-    /// 1. AV_Framework.CompMechReloadableResourceHolder (steel reserve gizmo)
-    /// 2. AV_Framework.CompMechCarrierChoice (release-urchins gizmo)
-    /// 3. GD3.CompAttackMode (Glitterworld Destroyer 5's auto-release-urchins toggle)
+    /// 1. RimWorld.CompMechCarrier (vanilla Biotech - the War Queen's own steel
+    ///    reserve/urchin-release gizmo, combined into one comp; confirmed via decompile:
+    ///    `if (!(parent is Pawn { IsColonyMech: not false } pawn) || pawn.GetOverseer()
+    ///    == null) yield break;` - the exact same shape as the two below, easy to miss
+    ///    since this mod's own whitelist doc comment only mentioned the IsColonyMech half
+    ///    of that condition, not GetOverseer, and this comp was never added here as a
+    ///    result. Confirmed via a real, extensively-diagnosed bug: a sapient War Queen's
+    ///    IsColonyMech read correctly true (confirmed via IsMechanicalCache diagnostics),
+    ///    yet the steel reserve/urchin buttons stayed missing regardless, because nothing
+    ///    was ever suppressing GetOverseer during this specific comp's own enumeration.
+    /// 2. AV_Framework.CompMechReloadableResourceHolder ([AV] Work Queen's steel reserve)
+    /// 3. AV_Framework.CompMechCarrierChoice ([AV] Work Queen's release-urchins gizmo)
+    /// 4. GD3.CompAttackMode (Glitterworld Destroyer 5's auto-release-urchins toggle)
     ///
     /// Also backstops CompMechReloadableResourceHolder's innerContainer, which is left
     /// null after a save load (its own PostSpawnSetup guard is skipped when
-    /// respawningAfterLoad is true) - same root cause as vanilla CompMechCarrier's
-    /// crash.
+    /// respawningAfterLoad is true) - RimWorld.CompMechCarrier had the exact same
+    /// innerContainer-after-load crash, fixed separately in
+    /// CompMechCarrier_PostExposeData_Patch.cs (predates this file's involvement with that
+    /// comp), so it isn't also routed through fixInnerContainer here.
     ///
     /// TryPatchComp is public so other mods can reuse this exact fix for a comp of
     /// their own with the same bug, without needing to reimplement the suppression
@@ -40,6 +53,7 @@ namespace SapientMechanoidFix
     {
         public static void Apply(Harmony harmony)
         {
+            TryPatchComp(harmony, "RimWorld.CompMechCarrier", fixInnerContainer: false);
             TryPatchComp(harmony, "AV_Framework.CompMechReloadableResourceHolder", fixInnerContainer: true);
             TryPatchComp(harmony, "AV_Framework.CompMechCarrierChoice", fixInnerContainer: false);
             TryPatchComp(harmony, "GD3.CompAttackMode", fixInnerContainer: false);

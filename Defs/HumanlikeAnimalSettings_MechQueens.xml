@@ -23,10 +23,17 @@
   urchin type to spawn rather than always the same one).
 
   Whitelisting the comps only gets them back onto the pawn - it doesn't make their
-  gizmos visible again on its own. Both RimWorld.CompMechCarrier and
-  AV_Framework.CompMechCarrierChoice/CompMechReloadableResourceHolder additionally gate
-  their CompGetGizmosExtra on pawn.IsColonyMech, which Big and Small deliberately clears
-  for every sapient mechanoid - see Pawn_IsColonyMech_Patch.cs for that half of the fix.
+  gizmos visible again on its own. RimWorld.CompMechCarrier and
+  AV_Framework.CompMechCarrierChoice/CompMechReloadableResourceHolder both gate their
+  CompGetGizmosExtra on TWO separate conditions, confirmed by decompile:
+  pawn.IsColonyMech (fixed generically by Pawn_IsColonyMech_Patch.cs, since Big and Small
+  deliberately clears it for every sapient mechanoid) AND pawn.GetOverseer() == null
+  (fixed per-comp by OverseerGizmoSuppressionPatches.cs, which has to be told about each
+  comp by name). Missing the second half for RimWorld.CompMechCarrier specifically once
+  caused a real bug - the War Queen's IsColonyMech read correctly, but its steel
+  reserve/urchin buttons stayed hidden anyway, since nothing was suppressing GetOverseer
+  for that particular comp. Adding a new mechanoid comp to the whitelist above that has
+  this same two-condition shape needs both fixes, not just the IsColonyMech one.
   -->
   <BigAndSmall.HumanlikeAnimalSettings>
     <defName>SapientMechanoidFix_MechQueenWhitelist</defName>

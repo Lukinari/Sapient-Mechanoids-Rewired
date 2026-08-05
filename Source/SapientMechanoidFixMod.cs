@@ -37,21 +37,19 @@ namespace SapientMechanoidFix
             listing.CheckboxLabeled(
                 "Never re-check pawns already confirmed non-mechanical",
                 ref Settings.freezeNonMechanicalCache,
-                "Once this mod checks a pawn and finds it's not mechanical, it normally still re-checks periodically (see the interval below), just in case some other mod later turns that organic pawn mechanical - a gene, hediff, or piece of apparel added mid-game. If nothing in your mod list ever does that, those re-checks are pure waste, since the vast majority of any colony is ordinary human colonists. Turning this on skips all future re-checks for a pawn once it's confirmed non-mechanical - safe if you don't run anything that converts an organic pawn into a mechanical one, but if you do, this mod may permanently fail to notice and that pawn won't get this mod's fixes applied. Off by default.");
+                "Once this mod checks a pawn and finds it's not mechanical, it normally still re-checks periodically (see the interval below), just in case some other mod later turns that organic pawn mechanical - a gene, hediff, or piece of apparel added mid-game. If nothing in your mod list ever does that, those re-checks are pure waste, since the vast majority of any colony is ordinary human colonists. Turning this on skips future re-checks for a pawn once it's confirmed non-mechanical - safe if you don't run anything that converts an organic pawn into a mechanical one, but if you do, this mod may permanently fail to notice and that pawn won't get this mod's fixes applied. A pawn's very first check is always given one refresh cycle before it's eligible to freeze, so a newly-converted or freshly-loaded mech that happens to fail its first check (a same-tick ordering thing, not a real answer) still gets a chance to self-correct rather than getting stuck. That refresh is measured in real time, not paused game time, so it still happens on schedule even while you're paused inspecting the pawn. Off by default.");
+            listing.Label($"IsMechanical cache refresh interval: {Settings.isMechanicalCacheRefreshTicks} ticks");
+            Settings.isMechanicalCacheRefreshTicks = Mathf.RoundToInt(listing.Slider(Settings.isMechanicalCacheRefreshTicks, 30f, 5000f));
+            Text.Font = GameFont.Tiny;
             if (Settings.freezeNonMechanicalCache)
             {
-                Text.Font = GameFont.Tiny;
-                listing.Label("Refresh interval below doesn't apply while this is on - a non-mechanical pawn is never re-checked at all, so there's nothing left to time.");
-                Text.Font = fontBefore;
+                listing.Label("With the setting above on, this still controls one thing: how long a pawn's first check is given to self-correct before it can be frozen. A confirmed mechanical pawn is never re-checked regardless of this setting, since that status doesn't revert.");
             }
             else
             {
-                listing.Label($"IsMechanical cache refresh interval: {Settings.isMechanicalCacheRefreshTicks} ticks");
-                Settings.isMechanicalCacheRefreshTicks = Mathf.RoundToInt(listing.Slider(Settings.isMechanicalCacheRefreshTicks, 30f, 5000f));
-                Text.Font = GameFont.Tiny;
-                listing.Label("Most of this mod's patches ask \"is this pawn one of ours\" very often - the answer is cached per pawn for this many ticks before being re-checked, rather than recomputed every time. 250 (default) is a good balance for most colonies. If you're running an unusually mechanoid-heavy colony and still seeing stutter, try raising this - the tradeoff is this mod taking slightly longer to notice if a pawn's mechanical status ever genuinely changes, which in practice is rare. A confirmed mechanical pawn is never re-checked regardless of this setting, since that status doesn't revert - this only affects how often an ordinary colonist gets re-checked.");
-                Text.Font = fontBefore;
+                listing.Label("Most of this mod's patches ask \"is this pawn one of ours\" very often - the answer is cached per pawn for roughly this many ticks' worth of real time before being re-checked (measured by the clock, not the game's simulated ticks, so it still elapses on schedule even while paused), rather than recomputed every time. 250 (default) is a good balance for most colonies. If you're running an unusually mechanoid-heavy colony and still seeing stutter, try raising this - the tradeoff is this mod taking slightly longer to notice if a pawn's mechanical status ever genuinely changes, which in practice is rare. A confirmed mechanical pawn is never re-checked regardless of this setting, since that status doesn't revert - this only affects how often an ordinary colonist gets re-checked.");
             }
+            Text.Font = fontBefore;
             listing.End();
             base.DoSettingsWindowContents(inRect);
         }
