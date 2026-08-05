@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!--
+  Purely informational - HediffSet_GetHungerRateFactor_Patch.cs is what actually makes
+  the Nuclear Battery reduce a sapient mech's hunger rate; nothing here changes behavior.
+  Without this, the only way to know the hediff does that on a sapient mech is prior
+  knowledge of this mod's own source or checking the inspect tab's hunger-rate math by
+  hand - appending a line to the hediff's own description makes it discoverable in the
+  normal tooltip instead. Gated on Aoba.DeadManSwitch.Core being installed - without it,
+  DMS_NuclearBattery doesn't exist for the xpath to match.
+  -->
+
+  <Operation Class="PatchOperationReplace" MayRequire="Aoba.DeadManSwitch.Core">
+    <xpath>Defs/HediffDef[defName="DMS_NuclearBattery"]/description</xpath>
+    <value>
+      <description>The abundant output of installed nuclear-powered quantum batteries eliminates the need to recharge. The reactor can be overloaded to produce a chain reaction meltdown comparable to an anti-grain warhead.\n\nOn a sapient mechanoid, which no longer runs on mech energy, this instead reduces its hunger rate by that same factor.</description>
+    </value>
+  </Operation>
+
+</Patch>

@@ -69,6 +69,14 @@
            together. -->
       <li>SapientMechanoidFix.CompProperties_SapientMechHitArmor</li>
 
+      <!-- Lady's custom head texture, restored by grafting Fortified's own head render
+           node onto whatever tree Big and Small actually assigns her (BS_HumanlikeAnimal
+           - a tree with no head node at all) rather than by forcing her original
+           "HumanlikeMech" tree, which crashed rendering for every pawn on the map (see
+           CompSapientHumanlikeMechHead.cs and Patches/HumanlikeMechHead.xml, which is
+           what actually adds this comp to DMS_Mech_Lady in the first place). -->
+      <li>SapientMechanoidFix.CompProperties_SapientHumanlikeMechHead</li>
+
       <!-- Glitterworld Destroyer 5 - War Queen's "kill all urchins" button. Its
            gizmo only checks Owner.Faction == Faction.OfPlayer, no mechanoid-specific
            gate at all, so this needs nothing beyond the whitelist entry itself. Only
@@ -83,10 +91,402 @@
            reuses the exact same suppression-window fix for this comp's
            CompGetGizmosExtra too. -->
       <li>GD3.CompProperties_AttackMode</li>
+
+      <!-- Vanilla Biotech/Odyssey - shared library comps used by several unrelated
+           mods' worker/scout mechanoids (Dead Man's Switch's drones, [AV] Framework's
+           Work Queen urchins, Alpha Mechs, Mechanoid Invaders, Mechanoids: Total
+           Warfare), not just Dead Man's Switch - whitelisting the vanilla class once
+           covers all of them, since none of them define their own copy. Both
+           confirmed clean by full source read: no IsColonyMech/GetOverseer/needs.energy
+           checks anywhere. -->
+      <li>RimWorld.CompProperties_MechPowerCell</li>
+      <li>RimWorld.CompProperties_HunterDrone</li>
+
+      <!-- Dead Man's Switch (Aoba.DeadManSwitch.Core/.AncientCorps/.Expedition) - most
+           of its mechanoid-specific comps actually live in a shared dependency,
+           "Fortified Feature Framework" (AOBA.Framework), not in DMS's own DLL. All
+           confirmed clean by full source read (gizmo/action gates use Faction checks,
+           IsColonyMechPlayerControlled, or IsPlayerControlled - never GetOverseer or
+           RaceProps.IsMechanoid directly) except CompProperties_DeadManSwitch's own
+           JobDriver, which needed a separate fix - see
+           Fortified_JobDriver_RepairSelf_MakeNewToils_Patch.cs. -->
+      <li>Fortified.CompProperties_VehicleWeapon</li>
+      <li>Fortified.CompPropertiesMultipleTurretGun</li>
+      <li>Fortified.CompProperties_MeleeSweep</li>
+      <li>Fortified.CompProperties_Camouflage</li>
+      <li>Fortified.CompProperties_MechApparel</li>
+      <li>Fortified.CompProperties_WeaponImprint</li>
+      <li>Fortified.CompProperties_MechPlatform</li>
+      <li>Fortified.CompProperties_Drone</li>
+      <li>Fortified.CompExplosiveOnMelee</li>
+      <li>Fortified.CompProperties_Floating</li>
+      <li>Fortified.CompPropertiesInteracte</li>
+      <li>Fortified.CompProperties_DeadManSwitch</li>
+      <li>Fortified.CompProperties_CommandRelay</li>
+
+      <!-- Vanilla Expanded Framework - a different "Floating" comp than Fortified's
+           own (same name, unrelated classes), used by Dead Man's Switch - Expedition's
+           Automatroid. Also confirmed clean. -->
+      <li>VEF.AnimalBehaviours.CompProperties_Floating</li>
+
+      <!-- Dead Man's Switch - a working-state cosmetic fleck effect (steam/sparks), found
+           in a fuller re-scan of the whole roster. Its IsActive check reads
+           MechanitorUtility.GetMechWorkMode(pawn), which is null-safe all the way down and
+           simply returns null for a sapient mech (no Overseer relation) rather than
+           throwing - null compares as "not SelfShutdown/Recharge", so the effect just
+           always shows instead of only while genuinely working. Cosmetic-only, no crash
+           risk, whitelisted as-is. -->
+      <li>Fortified.CompProperties_FlyingFleckThrower</li>
+
+      <!-- Fortified Feature Framework - not currently used by any Dead Man's Switch
+           mechanoid, whitelisted preemptively alongside their code fixes (see
+           Fortified_CompMechDeactivate_CompGetGizmosExtra_Patch.cs and
+           Fortified_CompMechanitorRange_CompTickRare_Patch.cs) in case another
+           Fortified-consuming mod attaches either later. -->
+      <li>Fortified.CompProperties_MechDeactivate</li>
+      <li>Fortified.HediffCompProperties_MechanitorRange</li>
+
+      <!-- Mechanoids: Total Warfare (Nyar.NCLvsTW) - 23 of its 26 mechanoids carry a
+           non-trivial comp, spread across four assemblies (NCLvsTW.dll, its bundled
+           NyearsModPackOne.dll, NCLWorm.dll, TowerLaserDefense.dll). Every one of them
+           was checked against full decompiled source for the three recurring bug
+           patterns (direct MechanitorUtility.GetOverseer(pawn)/pawn.IsColonyMech(PlayerControlled)
+           checks, and pawn.needs.energy null derefs) - none were found. All gizmo-bearing
+           comps here gate purely on `parent.Faction == Faction.OfPlayer`, so unlike Dead
+           Man's Switch/Fortified this mod needed zero Harmony patches, just whitelisting.
+           One exception, NOT whitelisted here pending a design call - see
+           NCL.CompProperties_TameableMech below. -->
+      <li>NCL.CompProperties_MechAutoRecovery</li>
+      <li>NCL.CompProperties_MechanoidShield</li>
+      <li>NCL.CompProperties_WeaponGiver</li>
+      <li>NCL.CompProperties_TurretGunPawnOnly</li>
+      <li>NCL.CompProperties_TurretGun_GroundTarget</li>
+      <li>NCL.CompProperties_AllDead</li>
+      <li>NCL.CompProperties_AlwaysWork</li>
+      <li>NCL.CompProperties_SilverSummon</li>
+      <li>NCL.CompProperties_ClearOwnerProjectiles</li>
+      <li>NCL.CompProperties_OnDeathEvent</li>
+
+      <!-- TW_Mech_Birgus's smokepop-on-hit toggle - initially left off the list above.
+           An earlier pass classified NCL.CompProperties_SmokepopOnHit as already
+           covered by Big and Small's own default whitelist and excluded it from that
+           scan on that basis; that assumption was wrong (confirmed by testing - the
+           toggle is lost on the sapient version), so it's whitelisted here instead. No
+           code fix needed - the comp itself gates purely on Faction.OfPlayer, same as
+           the rest of this mod's comps. -->
+      <li>NCL.CompProperties_SmokepopOnHit</li>
+      <li>NCL.CompProperties_AntiInvisibilityField</li>
+      <li>NCL.CompProperties_FearAura</li>
+      <li>NCL.CompProperties_FearFire</li>
+      <li>NCL.CompProperties_IgnoreCommandRange</li>
+
+      <!-- RimWorld.CompProperties_AutoMechSpawner: despite the unqualified-looking name
+           this is one of NCLvsTW.dll's own classes, just declared inside a literal
+           `namespace RimWorld { }` block in its source (confirmed by decompile) rather
+           than a vanilla type - full name really is RimWorld.CompProperties_AutoMechSpawner. -->
+      <li>RimWorld.CompProperties_AutoMechSpawner</li>
+
+      <!-- NyearsModPackOne.dll, bundled inside the Total Warfare mod folder (own
+           dependency, not a separate Workshop item) - powers the Dinergate/Scutiger
+           drone-release mechanoids. CompGetGizmosExtra gates only on Faction.OfPlayer;
+           PostExposeData already Scribe_Deep's its innerContainer correctly (unlike AV
+           Framework's comp), so no innerContainer-after-load backstop is needed either. -->
+      <li>NyarsModPackOne.CompProperties_DroneCarrier</li>
+
+      <!-- NCLWorm.dll - NCL_MechWorm's ability/shield kit (used by the Archowrom Titan
+           and the Shell Fortification mech family). All confirmed clean by full source
+           read. -->
+      <li>NCLWorm.CompProperties_BattleCrush</li>
+      <li>NCLWorm.CompProperties_CauseHediff_AoEAndRing</li>
+      <li>NCLWorm.CompProperties_DamageAbsorbedAndBoom</li>
+      <li>NCLWorm.CompProperties_ShieldNCLWorm</li>
+      <li>NCLWorm.CompProperties_NCLWormSkillList</li>
+
+      <!-- TowerLaserDefense.dll - shared turret/laser-defense ability system used by
+           several Total Warfare mechanoids (PillBug, MechTeslaCentipede, both Militor
+           psycasts variants, Shell Fortification family). Gizmo gates only on
+           Faction.OfPlayer. -->
+      <li>TowerLaserDefense.CompProperties_LaserDefence</li>
+
+      <!-- Glitterworld Destroyer 5 (fxz.glitterworlddestroyer.mk5) - 11 of its 15
+           mechanoids carry a non-trivial comp; this now covers all 11 except
+           Mech_Annihilator (Odyssey) - see README's Planned features for why that one's
+           deferred. GD3.CompProperties_AllDead and GD3.CompProperties_AttackMode (War
+           Queen's add-on buttons) were already whitelisted above.
+           Mech_Observer/Mech_CataphractCentipede's weapon-swap button both needed the
+           same GetOverseer(pawn) == null gizmo/click-time fix as AV Framework/this
+           mod's other GD5 entry - see OverseerGizmoSuppressionPatches.cs.
+           Mech_CataphractCentipede's other comp, CompDrawBattery, dereferences
+           pawn.needs.energy with no null check and crashes every frame while a sapient
+           mech is drafted - see GD3_CompDrawBattery_PostDraw_Patch.cs. -->
+      <li>GD3.CompProperties_ObserverLink</li>
+      <li>GD3.CompProperties_ChangeWeaponB</li>
+      <li>GD3.CompProperties_FloatingCannon</li>
+      <li>GD3.CompProperties_Invisibility</li>
+      <li>GD3.CompProperties_HitArmor</li>
+      <li>GD3.CompProperties_BlackApocriton</li>
+      <li>GD3.CompProperties_ArchoDrone</li>
+      <li>GD3.CompDrawBattery</li>
+      <li>GD3.CompBlackFaction</li>
+      <li>GD3.CompTeleport_Attack</li>
+      <li>GD3.CompTeleport_Defend</li>
+
+      <!-- Glitterworld Destroyer 5 also patches comps onto several VANILLA mechanoid
+           ThingDefs (not just its own Mech_* roster) - see
+           Biotech/Patches/Patch_BiotechMechanoids.xml. Found while chasing a user report
+           that the vanilla Apocriton's abilities were broken on a sapient conversion.
+           All three confirmed clean by full source read (no GetOverseer/needs.energy/
+           custom-subclass checks). CompMilitor only activates on a specific
+           quest-scripted Militor instance and is otherwise inert. -->
+      <li>GD3.CompMilitor</li>
+      <li>GD3.CompProperties_Apocriton</li>
+      <li>GD3.CompProperties_PsychicAttack</li>
+
+      <!-- Vanilla/shared comps used by several of GD5's "black" mechanoids
+           (Mech_BlackLancer's shield belt, Mech_BlackLegionary's bullet shield,
+           Mech_BlackApocriton's attached effecter) - whitelisted explicitly in case
+           Big and Small's own defaults don't already cover them, same defensive
+           approach as RimWorld.CompProperties_MechPowerCell above.
+
+           BUG FIXED: these three were missing their "RimWorld." namespace prefix, so
+           they never actually matched anything - HumanlikeAnimalGenerator's whitelist
+           check is an exact, case-insensitive string match against the comp's full
+           namespace-qualified type name (confirmed by decompiled source:
+           `compWhitelist.Contains(x.GetType().ToString(), StringComparer.OrdinalIgnoreCase)`),
+           not a suffix/contains match - "CompProperties_Shield" alone never matches
+           "RimWorld.CompProperties_Shield". This silently stripped every sapient
+           mechanoid's personal energy shield across every mod that grants one this way
+           (confirmed on GD5's Black Lancer/Black Legionary; likely affects any other
+           mod's mechs using the same vanilla comp for their shields, not just GD5's). -->
+      <li>RimWorld.CompProperties_Shield</li>
+      <li>RimWorld.CompProperties_ProjectileInterceptor</li>
+      <li>RimWorld.CompProperties_Effecter</li>
+
+      <!-- Reinforced Mechanoid 2 (Mlie.ReinforcedMechanoid2) - the original pass here only
+           scanned ReinforcedMechanoids.dll's own comp classes and covered RM_Mech_Caretaker,
+           RM_Mech_Gremlin, RM_Mech_Harpy, RM_Mech_Zealot, RM_Mech_Wraith, RM_Mech_Locust
+           (and their VFE_-prefixed duplicates). A later, fuller pass (triggered by chasing
+           the shield bug below) found RM2 actually has several more mechanoids with comps
+           that scan never reached: RM_Mech_Behemoth, RM_Mech_Falcon, RM_Mech_Marshal,
+           RM_Mech_Sentinel, plus modExtensions used across most of the roster. RM_Mech_
+           Vulture, RM_Mech_Ranger, and RM_Mech_Matriarch carry no comps at all - nothing
+           to whitelist there. RM_Droid_Buffer and RM_Droid_Spartan's
+           ReinforcedMechanoids.CompProperties_Machine is still NOT covered - it ties into
+           a charging-station/Need_Power framework that needs more investigation before
+           it's safe to whitelist (a sapient droid retaining that need with no way to
+           refill it could be an unintended-death risk) - see README's Planned features.
+           Every entry below is confirmed clean by full source read - every comp here
+           resolves the parent as a plain Pawn and gates purely on faction/health/distance/
+           comp-presence, no GetOverseer/needs.energy/custom-subclass checks anywhere. -->
+      <li>ReinforcedMechanoids.CompProperties_ExplodeIfNoOtherFactionPawns</li>
+      <li>ReinforcedMechanoids.CompProperties_Explosions</li>
+      <li>ReinforcedMechanoids.CompProperties_GrenadeThrower</li>
+      <li>ReinforcedMechanoids.CompProperties_PawnJumper</li>
+      <li>ReinforcedMechanoids.CompProperties_Invisibility</li>
+
+      <!-- RM_Mech_Behemoth/RM_Mech_Wraith's lifestage-graphic-swap comp (changes
+           appearance based on missing parts/health thresholds - reads pawn.ageTracker
+           the same way any ordinary pawn's rendering does, nothing animal-specific). -->
+      <li>ReinforcedMechanoids.CompProperties_ChangeGraphic</li>
+
+      <!-- RM_Mech_Sentinel's berserk-on-low-health comp. -->
+      <li>ReinforcedMechanoids.CompProperties_MentalStateOnDamage</li>
+
+      <!-- RM_Mech_Wraith's idle ambient sound loop. -->
+      <li>ReinforcedMechanoids.CompProperties_AmbientSound</li>
+
+      <!-- Vanilla - RM_Mech_Caretaker's plain death-explosion comp, separate from
+           ReinforcedMechanoids.CompProperties_Explosions above (Caretaker carries both).
+           Not in Big and Small's own default whitelist either - checked directly. -->
+      <li>RimWorld.CompProperties_Explosive</li>
+
+      <!-- RM_Mech_Caretaker's actual "bubble shield" comp - missed in the pass above
+           since it comes from Vanilla Expanded Framework (VEF.Apparels), not
+           ReinforcedMechanoids.dll itself, so it wasn't in the same source file as the
+           rest of Caretaker's comps. This alone explains the "shield doesn't affect
+           sapient mechs" report - it was being silently stripped by the whitelist
+           filter, so a sapient Caretaker had no shield at all, not a shield with a
+           targeting bug. Confirmed clean by full source read: the shield's damage
+           interception is purely positional (checks which cells/things are within its
+           radius), no race/faction/mechanoid-type filtering anywhere.
+
+           RM_Mech_Marshal has its own, separate personal shield - VEF.Apparels.
+           CompProperties_ShieldBubble, a different class than Caretaker's ShieldField
+           (same name, unrelated to vanilla's own CompProperties_Shield fixed elsewhere in
+           this file). Found in the same pass as the shield bug above. Also confirmed
+           clean by full source read. -->
+      <li>VEF.Apparels.CompProperties_ShieldField</li>
+      <li>VEF.Apparels.CompProperties_ShieldBubble</li>
+
+      <!-- Alpha Mechs (sarg.alphamechs) - 9 of its 40 mechanoids carry a non-trivial
+           comp, covering AM_Aura/Daggersnout/Demolisher/Fireworm/Goliath/Phalanx/
+           Siegebreaker (CompProperties_ChangeDef) and AM_Infernus
+           (CompProperties_TargetingBeamBlue) - AM_Mech_Guttersnipe's
+           CompProperties_MechPowerCell was already covered generically above.
+           CompProperties_ChangeDef only ever fires for non-player-faction pawns
+           (defection/reskin flavor for wild mechs), so it's inert for a sapient mech
+           either way; CompProperties_TargetingBeamBlue is just a cosmetic aiming-laser
+           overlay. Both confirmed clean by full source read. Also whitelists the shared
+           VEF regeneration comp Aura uses, confirmed clean the same way. -->
+      <li>AlphaMechs.CompProperties_ChangeDef</li>
+      <li>AlphaMechs.CompProperties_TargetingBeamBlue</li>
+      <li>VEF.AnimalBehaviours.CompProperties_Regeneration</li>
+
+      <!-- Alpha Mechs also ships a second, much larger mechanoid roster under its own
+           "Mods/Biotech" subfolder (Legate, Optio, Apoptosis, Lux, Bellicor, Artilleron,
+           Blitzkrieg, Guttersnipe, Infernus, MasterChef, Munifex, Polychoron,
+           PristineAssembler, PristineSlurrypede, PristineStrider, Sagittarius,
+           Siegemelter, Starfire, TurboCleaner, WarEmpress) that the original comp scan
+           missed entirely - found while chasing a user report that shields don't survive
+           sapience. Legate and Optio's ProjectileInterceptor and Apoptosis's Effecter are
+           covered by the RimWorld.CompProperties_ProjectileInterceptor/CompProperties_Effecter
+           fix above; WarEmpress's CompProperties_MechCarrier and Apoptosis/Infernus/
+           WarEmpress's CompProperties_TurretGun were already covered generically. The two
+           entries below are the Guttersnipe's dormancy comps. CompWakeUpDormant only
+           wakes non-player-faction pawns, never touches a player's own sapient one, but
+           CompCanBeDormant needed its own follow-up fix - see
+           CompCanBeDormant_Awake_Patch.cs, which is what actually stops a sapient mech
+           from showing the vanilla sleeping "Z" icon forever (its wokeUpTick, the field
+           that normally gets set once during a real mechanoid's construction, is never
+           touched when the comp is only added back by this whitelist entry rather than
+           genuinely spawned with it). The rest of this second roster hasn't been checked
+           yet - see README's Planned features. -->
+      <li>RimWorld.CompProperties_CanBeDormant</li>
+      <li>RimWorld.CompProperties_WakeUpDormant</li>
+
+      <!-- [AV] Mechtech (Veltaris.Mechtech) - the Fluoid's neurofoam/neutroamine/hemogen
+           paste production comp. requiresPower=false and its two scaling stats
+           (WorkSpeedGlobal, BloodFiltration) are ordinary StatDefs a sapient pawn already
+           has, so it's confirmed clean by source read - no mechanoid/overseer/energy
+           gating anywhere in AV_Framework.Comp_SelectableSpawner itself. The Scrapper and
+           Tarantula's own [AV] Mechtech comps/abilities needed no whitelisting (either
+           already covered by the Work Queen's CompProperties_MechReloadableResourceHolder
+           entry above, or are AbilityDef comps, which aren't filtered by this whitelist at
+           all - only ThingDef comps are). The Reshaper isn't supported - see the mod's
+           README Known Issues. -->
+      <li>AV_Framework.CompProperties_SelectableSpawner</li>
+
+      <!-- [AV] Mechtech - the Companoid sphere's "guiding protocol" buff-aura comp and its
+           own radio/mote-effect comp. Confirmed clean by actual shipped source (both mods
+           ship .cs directly, no decompiling needed) - Comp_GiveHediffsWhenAlive's only
+           mechanoid-control check is commented out in the source itself, and
+           AV_Mechtech.Comp_RadioMech has no mechanoid/overseer/energy gating anywhere. -->
+      <li>AV_Framework.CompProperties_GiveHediffsWhenAlive</li>
+      <li>AV_Mechtech.CompProperties_RadioMech</li>
+
+      <!-- Ascension Megacorp (AOBA.USAC.Core) - shared by every USAC mech (Cobalt, Gonk,
+           Omaha, Paraman, Rocky): CompProperties_MechReadiness backs their "readiness"
+           need (Need_Readiness) in place of vanilla's energy bar, refilled with industrial
+           components. Comp and need are both confirmed clean by full source read - no
+           mechanoid/overseer gating in either, Need_Readiness only checks that its comp is
+           present. The comp being stripped by the whitelist filter is what was making the
+           need (and the resupply work) disappear entirely; the resupply WorkGiver's own
+           separate IsMechanoid gate needed its own fix too - see
+           USAC_WorkGiver_ResupplyMech_HasJobOnThing_Patch.cs. CompProperties_BulletDeflect
+           (Omaha's melee deflection) and CompProperties_MechWreck (leaves a wreck prop on
+           death) are also confirmed clean, no gating at all. Fortified.CompProperties_
+           MechDeactivate/CompProperties_VehicleWeapon/CompProperties_MechApparel are
+           already whitelisted above from the Dead Man's Switch work and cover Cobalt/Gonk/
+           Omaha/Paraman's weapons and Rocky's apparel-mech gear the same way. -->
+      <li>USAC.CompProperties_MechReadiness</li>
+      <li>USAC.CompProperties_BulletDeflect</li>
+      <li>USAC.CompProperties_MechWreck</li>
+
+      <!-- Ascension Megacorp - the shared mech base's paint/camo comp. Confirmed clean by
+           full source read (Fortified.CompProperties_Paintable is a colonist-facing color
+           picker gizmo, no mechanoid-specific logic anywhere). -->
+      <li>Fortified.CompProperties_Paintable</li>
+
+      <!-- Mechanoid Upgrades (GoGaTio.MechanoidUpgrades) - its core comp is patched onto
+           EVERY mechanoid ThingDef in the game (vanilla and modded alike) that has
+           RimWorld.CompProperties_OverseerSubject in its own comps - see the mod's own
+           Patches_UpgradeComp.xml, an xpath match against `comps/li[@Class =
+           "CompProperties_OverseerSubject"]`, not a hardcoded mod list. That's every
+           mechanitor-controllable mechanoid from every mod already covered in this file
+           (all of them ultimately derive from vanilla's BaseMechanoid, which carries that
+           comp). CompProperties_UpgradableMechanoid itself is confirmed clean by full
+           source read - its gizmo/reload logic already keys off Pawn.IsColonyMechPlayerControlled,
+           which Pawn_IsColonyMechPlayerControlled_Patch.cs already fixes generically.
+
+           The actual blocker was the mod's own entry point: the float-menu option to walk
+           a mech into its "Mech Upgrader" building checks pawn.RaceProps.IsMechanoid
+           directly (false for a sapient mech, so the option to configure upgrades never
+           even appeared) - see
+           MU_FloatMenuOptionProvider_EnterUpgrader_AppliesInt_Patch.cs. -->
+      <li>MU.CompProperties_UpgradableMechanoid</li>
+
+      <!-- Needed for the above - CompUpgradableMechanoid's building-entry checks
+           (Building_MechUpgrader.CanAcceptPawn/TickInterval) dereference
+           pawn.OverseerSubject.State directly, which is null (crash) unless this vanilla
+           comp is also whitelisted. This is also the exact comp behind the vanilla
+           "mechanoid goes feral without an overseer" mechanic, which would otherwise fire
+           for every sapient mech (they're deliberately never mechanitor-overseen) - see
+           CompOverseerSubject_State_Patch.cs, which forces State to Overseen for a sapient
+           mech specifically. That one change both prevents the feral risk and satisfies
+           the Mech Upgrader's own "is this thing supervised" check the same way a real,
+           actively-overseen mechanoid's would. -->
+      <li>RimWorld.CompProperties_OverseerSubject</li>
     </compWhitelist>
     <tabWhitelist>
       <li>AV_Framework.ITab_MechQueen</li>
+
+      <!-- Mechanoid Upgrades' own inspector tab for viewing/configuring installed
+           upgrades - inserted into inspectorTabs at load time by
+           CompProperties_UpgradableMechanoid.PostLoadSpecial, so it needs whitelisting
+           here the same as any other tab. Purely comp-presence-gated
+           (IsVisible checks HasComp<CompUpgradableMechanoid>), no mechanoid-type checks. -->
+      <li>MU.ITab_MechUpgrades</li>
     </tabWhitelist>
+
+    <!-- DMS_Mech_Lady is the one Dead Man's Switch mechanoid built on Fortified's own
+         "humanlike mech" rendering system (thingClass Fortified.HumanlikeMech), rather
+         than vanilla's mechanoid rendering - it needs its custom head texture
+         (HumanlikeMechExtension.headGraphic/headGraphicHaired) to draw a face at all.
+         HumanlikeAnimalGenerator filters modExtensions through this whitelist exactly
+         like comps/tabs, and Lady's def was never added - so on the sapient version
+         Extension resolves to null and PawnRenderNode_Head.GraphicFor/
+         PawnRenderNodeWorker_Head.OffsetFor (both unconditional Extension.xxx
+         dereferences) silently fail, and the head just never renders. MechWeaponExtension/
+         TurretMannableExtension are whitelisted alongside it since they live on the same
+         def and would otherwise be silently dropped the same way (weapon tech-level
+         filtering, turret-manning eligibility) even though no symptom from those has been
+         reported yet. -->
+    <modExtensionWhitelist>
+      <li>Fortified.HumanlikeMechExtension</li>
+      <li>Fortified.MechWeaponExtension</li>
+      <li>Fortified.TurretMannableExtension</li>
+
+      <!-- [AV] Mechtech's Scrapper carries this marker extension (empty, no fields) to
+           mark it eligible for mortar use - same silent-drop risk as the others above,
+           whitelisted for the same reason even though no specific symptom was reported. -->
+      <li>AV_Framework.MechCanUseMortar</li>
+
+      <!-- Reinforced Mechanoid 2 - data-only extensions carried by most of the roster,
+           found in the same fuller pass that caught the missing RM2 comps above.
+           MechanoidExtension only affects mech-cluster spawn eligibility and hacked-mech
+           power-need behavior (pawn-generation-time, not relevant once already sapient);
+           AdditionalButcherProducts only affects corpse butchering yield; both are inert
+           for a live sapient mech either way, whitelisted for consistency.
+           EquipmentDrawPositionOffsetExtension (RM_Mech_Wraith) controls where its weapon
+           is drawn relative to its body - cosmetic but worth keeping intact. -->
+      <li>ReinforcedMechanoids.MechanoidExtension</li>
+      <li>ReinforcedMechanoids.AdditionalButcherProducts</li>
+      <li>ReinforcedMechanoids.EquipmentDrawPositionOffsetExtension</li>
+    </modExtensionWhitelist>
+
+    <!-- Do NOT also whitelist Lady's original "HumanlikeMech" render tree (tried once,
+         reverted - see git history/changelog). That tree's body node is
+         PawnRenderNode_AnimalPart, which calls Pawn.ageTracker.CurKindLifeStage - valid
+         for the animal-style pawn Fortified originally built it for, but Big and Small's
+         sapience conversion also flips RaceProps.Humanlike true, and CurKindLifeStage
+         throws/returns null for a genuinely humanlike pawn. Forcing that tree crashed
+         PawnRenderTree.TrySetupGraphIfNeeded for Lady specifically, which took every
+         other pawn's rendering down with it (one uncaught exception mid-frame in
+         DrawDynamicThings' shared loop). Letting Big and Small substitute its own
+         humanlike-safe tree is the safe default; the modExtensionWhitelist entry above
+         is unaffected by this revert and stays in place. Lady's head texture is still
+         unsolved as of this revert - restoring it needs a fix that doesn't touch which
+         render tree she uses at all. -->
   </BigAndSmall.HumanlikeAnimalSettings>
 
 </Defs>

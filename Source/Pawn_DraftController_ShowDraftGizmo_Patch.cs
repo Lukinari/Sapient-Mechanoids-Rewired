@@ -28,7 +28,7 @@ namespace SapientMechanoidFix
                     return;
 
                 Pawn pawn = __instance.pawn;
-                if (pawn.RaceProps.IsMechanoid || !pawn.IsMechanical())
+                if (pawn.RaceProps.IsMechanoid || !IsMechanicalCache.Get(pawn))
                     return; // Genuine mechanoid (leave vanilla's control-group requirement alone) or not mechanical at all.
 
                 if (!pawn.IsColonyMech)

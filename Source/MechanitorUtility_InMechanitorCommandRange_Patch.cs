@@ -26,7 +26,7 @@ namespace SapientMechanoidFix
         {
             try
             {
-                if (mech == null || mech.RaceProps.IsMechanoid || !mech.IsMechanical())
+                if (mech == null || mech.RaceProps.IsMechanoid || !IsMechanicalCache.Get(mech))
                     return true; // Genuine mechanoid, or not mechanical at all - vanilla's own overseer-range check applies unmodified.
 
                 if (!mech.IsColonyMech)

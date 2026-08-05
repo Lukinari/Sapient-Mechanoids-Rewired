@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!--
+  CompSapientHumanlikeMechHead.cs doesn't exist natively on any ThingDef built on
+  Fortified's "HumanlikeMech" rendering system (thingClass Fortified.HumanlikeMech,
+  renderTree HumanlikeMech or a mod's own copy of it, plus a Fortified.HumanlikeMechExtension
+  carrying the actual head texture) - it's added here so it flows through the same
+  clone/whitelist pipeline as the rest of a mech's comps (see compWhitelist in
+  HumanlikeAnimalSettings_MechQueens.xml). It self-gates to sapient-only at runtime (see
+  IsSapientMech), so its presence on the non-sapient original is harmless - a real
+  HumanlikeMech pawn already renders its head correctly through the static tree without
+  it.
+
+  Two mods share this exact rendering system so far: Dead Man's Switch's Lady, and
+  Ascension Megacorp's Rocky (all five of its PawnKindDef loadouts - AR/LMG/DMR/Heavy -
+  share one ThingDef, so a single entry covers all of them). Each mod needs its own
+  Operation since PatchOperationAdd's xpath has to name a specific defName - there's no
+  way to instead match "any ThingDef carrying Fortified.HumanlikeMechExtension" from XML
+  alone. If a third mod turns up using the same system, add another Operation here rather
+  than trying to make this one generic.
+  -->
+
+  <Operation Class="PatchOperationAdd" MayRequire="Aoba.DeadManSwitch.Core">
+    <xpath>Defs/ThingDef[defName="DMS_Mech_Lady"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SapientHumanlikeMechHead" />
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd" MayRequire="AOBA.USAC.Core">
+    <xpath>Defs/ThingDef[defName="USAC_Mech_Rocky"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SapientHumanlikeMechHead" />
+    </value>
+  </Operation>
+
+</Patch>

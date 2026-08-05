@@ -56,7 +56,7 @@ namespace SapientMechanoidFix
                 if (__instance.Faction != Faction.OfPlayer || __instance.MentalStateDef != null)
                     return;
 
-                if (!__instance.IsMechanical())
+                if (!IsMechanicalCache.Get(__instance))
                     return; // Not a mechanoid by Big and Small's own reckoning either - leave it false.
 
                 __result = __instance.HostFaction == null || __instance.IsSlave;

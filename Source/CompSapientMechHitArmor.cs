@@ -44,7 +44,7 @@ namespace SapientMechanoidFix
             get
             {
                 Pawn pawn = parent as Pawn;
-                return pawn != null && !pawn.RaceProps.IsMechanoid && pawn.IsMechanical();
+                return pawn != null && !pawn.RaceProps.IsMechanoid && IsMechanicalCache.Get(pawn);
             }
         }
 
@@ -122,6 +122,16 @@ namespace SapientMechanoidFix
                 yield return gizmo;
 
             if (!IsSapient || Props.limitOfTimes < 0)
+                yield break;
+
+            // If more than one CompSapientMechHitArmor somehow ends up on the same pawn
+            // (e.g. a comp-restoration pass re-adding it on top of one that survived some
+            // other way), only the first one in AllComps - the same instance
+            // parent.GetComp<T>() always resolves to - shows a gizmo. Never more than one
+            // reactive armor bar per pawn, regardless of how many instances exist
+            // underneath it; every instance still independently tracks/grants its own
+            // charges and hediff refresh, this only caps what's drawn.
+            if (parent.GetComp<CompSapientMechHitArmor>() != this)
                 yield break;
 
             yield return new SapientMechHitArmorGizmo(this);

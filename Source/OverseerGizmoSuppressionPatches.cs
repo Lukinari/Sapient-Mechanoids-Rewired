@@ -29,17 +29,38 @@ namespace SapientMechanoidFix
     /// null after a save load (its own PostSpawnSetup guard is skipped when
     /// respawningAfterLoad is true) - same root cause as vanilla CompMechCarrier's
     /// crash.
+    ///
+    /// TryPatchComp is public so other mods can reuse this exact fix for a comp of
+    /// their own with the same bug, without needing to reimplement the suppression
+    /// mechanism or fork this mod - see the "Adding Mechanoids to the Whitelist" wiki
+    /// page for the intended usage: call it with your own Harmony instance and the
+    /// full type name of your comp.
     /// </summary>
-    internal static class OverseerGizmoSuppressionPatches
+    public static class OverseerGizmoSuppressionPatches
     {
         public static void Apply(Harmony harmony)
         {
             TryPatchComp(harmony, "AV_Framework.CompMechReloadableResourceHolder", fixInnerContainer: true);
             TryPatchComp(harmony, "AV_Framework.CompMechCarrierChoice", fixInnerContainer: false);
             TryPatchComp(harmony, "GD3.CompAttackMode", fixInnerContainer: false);
+
+            // Glitterworld Destroyer 5 - Mech_Observer's connect toggle, and
+            // CataphractCentipede's weapon-swap button. Same GetOverseer(pawn) == null
+            // gizmo-visibility gate as the three above.
+            TryPatchComp(harmony, "GD3.CompObserverLink", fixInnerContainer: false);
+            TryPatchComp(harmony, "GD3.CompChangeWeaponB", fixInnerContainer: false);
         }
 
-        private static void TryPatchComp(Harmony harmony, string typeName, bool fixInnerContainer)
+        /// <summary>
+        /// Attaches the overseer-gizmo-suppression fix to an arbitrary comp by full type
+        /// name, resolved at runtime - safe to call even if the owning mod/type doesn't
+        /// exist, in which case this is a silent no-op. Pass your own Harmony instance;
+        /// there's no requirement that it be this mod's. Set fixInnerContainer to true
+        /// only if the comp has an IThingHolder-style "innerContainer" field that also
+        /// needs the null-after-load backstop (see PostExposeDataPostfix below) -
+        /// otherwise leave it false.
+        /// </summary>
+        public static void TryPatchComp(Harmony harmony, string typeName, bool fixInnerContainer)
         {
             try
             {
@@ -84,7 +105,7 @@ namespace SapientMechanoidFix
             try
             {
                 Pawn pawn = __instance.parent as Pawn;
-                if (pawn == null || pawn.RaceProps.IsMechanoid || !pawn.IsMechanical())
+                if (pawn == null || pawn.RaceProps.IsMechanoid || !IsMechanicalCache.Get(pawn))
                     return; // Real mechanoid, or not mechanical - leave GetOverseer's real behavior alone.
 
                 __result = WrapWithOverseerSuppression(__result, pawn);
@@ -120,8 +141,47 @@ namespace SapientMechanoidFix
                     }
                     if (!hasNext)
                         yield break;
+                    WrapGizmoAction(current, pawn);
                     yield return current;
                 }
+            }
+        }
+
+        // Some comps' gizmo actions re-check MechanitorUtility.GetOverseer themselves at
+        // click time, long after CompGetGizmosExtra's own enumeration (and the
+        // suppression window above) has closed - see Glitterworld Destroyer 5's
+        // CompChangeWeaponB.action for a concrete example that silently does nothing on
+        // click despite the gizmo itself showing enabled, since its Disabled flag is
+        // computed eagerly (inside the window) but its action delegate re-checks
+        // GetOverseer again only when actually invoked (outside it). Wrapping each
+        // gizmo's own action/toggleAction with the same suppress/unsuppress bracket
+        // closes that gap for every comp registered through TryPatchComp, not just the
+        // one known to need it today - Command_Action/Command_Toggle are both vanilla
+        // types, so this needs no reflection.
+        private static void WrapGizmoAction(Gizmo gizmo, Pawn pawn)
+        {
+            if (gizmo is Command_Action commandAction && commandAction.action != null)
+            {
+                Action original = commandAction.action;
+                commandAction.action = () => RunSuppressed(pawn, original);
+            }
+            else if (gizmo is Command_Toggle commandToggle && commandToggle.toggleAction != null)
+            {
+                Action original = commandToggle.toggleAction;
+                commandToggle.toggleAction = () => RunSuppressed(pawn, original);
+            }
+        }
+
+        private static void RunSuppressed(Pawn pawn, Action original)
+        {
+            SapientMechOverseerGizmoGuard.Suppress(pawn);
+            try
+            {
+                original();
+            }
+            finally
+            {
+                SapientMechOverseerGizmoGuard.Unsuppress(pawn);
             }
         }
 

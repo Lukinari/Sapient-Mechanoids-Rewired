@@ -39,7 +39,7 @@ namespace SapientMechanoidFix
                 Pawn pawn = parent as Pawn;
                 if (pawn == null || pawn.Dead || !pawn.Spawned)
                     return false;
-                if (pawn.RaceProps.IsMechanoid || !pawn.IsMechanical())
+                if (pawn.RaceProps.IsMechanoid || !IsMechanicalCache.Get(pawn))
                     return false; // Real mechanoid, or not mechanical at all - not ours to touch.
 
                 return GetPercentageFull() != null;

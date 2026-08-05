@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <name>Sapient Mechanoid Fix</name>
-  <author>Yorgrim</author>
-  <packageId>Yorgrim.SapientMechanoidFix</packageId>
+  <name>Sapient Mechanoids Rewired</name>
+  <author>Lukinari</author>
+  <packageId>Lukinari.SapientMechanoidFix</packageId>
+  <modVersion>1.0.0</modVersion>
   <description>Fixes sapient mechanoids (Big and Small - Sapient Animals) losing mechanoid-only abilities and gizmos - e.g. a sapient War Queen (vanilla Biotech) or Work Queen ([AV] Framework) loses its steel reserve and urchin-release command. Two causes, both addressed: Big and Small's humanlike-ThingDef generator strips any ThingComp it doesn't recognize (this adds vanilla's and AV Framework's mech-queen comps, plus AV Framework's inspector tab, to its whitelist), and even with the comps restored, they only show their gizmos on a pawn whose RaceProps.IsMechanoid is true - which Big and Small deliberately clears for sapience. This patches Pawn.IsColonyMech so it also counts a pawn as a colony mech when Big and Small's own IsMechanical() marker says it still is, restoring that and anything else in other mods gated the same way. Does nothing unless Big and Small is active.</description>
   <supportedVersions>
     <li>1.6</li>
@@ -24,5 +25,10 @@
     <li>Veltaris.Framework</li>
     <li>Veltaris.Mechqueen</li>
     <li>fxz.glitterworlddestroyer.mk5</li>
+    <li>Nyar.NCLvsTW</li>
+    <li>AOBA.Framework</li>
+    <li>Aoba.DeadManSwitch.Core</li>
+    <li>Aoba.DeadManSwitch.AncientCorps</li>
+    <li>Aoba.DeadManSwitch.Expedition</li>
   </loadAfter>
 </ModMetaData>

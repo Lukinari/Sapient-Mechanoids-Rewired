@@ -20,7 +20,7 @@ namespace SapientMechanoidFix
             __state = false;
             try
             {
-                if (__instance == null || __instance.RaceProps.IsMechanoid || !__instance.IsMechanical())
+                if (__instance == null || __instance.RaceProps.IsMechanoid || !IsMechanicalCache.Get(__instance))
                     return;
 
                 if (!__instance.IsColonyMech)

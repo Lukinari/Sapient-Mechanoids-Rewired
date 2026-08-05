@@ -14,26 +14,35 @@
     <Compile Include="*.cs" />
   </ItemGroup>
 
-  <!-- Adjust RimWorldPath to match your install location. -->
+  <!-- Adjust RimWorldPath/RimWorldDataPath below to match your own install location.
+       RimWorldDataPath is separate from RimWorldPath specifically because the two can
+       point at different-vintage installs: vanilla's own Assembly-CSharp/UnityEngine
+       assemblies need to match whatever build is actually being played against (a
+       stale reference already caused one real bug - a HarmonyException from an
+       ambiguous MechRepairUtility.RepairTick overload that only exists in a newer
+       build than what this project was originally set up against), while the
+       Mods-relative paths below (Harmony, Big and Small) aren't affected by base-game
+       version drift and don't need to move in lockstep. -->
   <PropertyGroup>
-    <RimWorldPath>C:\Games\Rimworld</RimWorldPath>
+    <RimWorldPath>C:\Program Files (x86)\Steam\steamapps\common\RimWorld</RimWorldPath>
+    <RimWorldDataPath>C:\Program Files (x86)\Steam\steamapps\common\RimWorld</RimWorldDataPath>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(RimWorldDataPath)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(RimWorldDataPath)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(RimWorldDataPath)\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(RimWorldDataPath)\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="0Harmony">

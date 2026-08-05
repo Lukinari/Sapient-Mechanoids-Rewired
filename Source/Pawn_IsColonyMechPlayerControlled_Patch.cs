@@ -33,7 +33,7 @@ namespace SapientMechanoidFix
                 if (__result || __instance == null || !__instance.Spawned)
                     return;
 
-                if (__instance.RaceProps.IsMechanoid || !__instance.IsMechanical())
+                if (__instance.RaceProps.IsMechanoid || !IsMechanicalCache.Get(__instance))
                     return; // Genuine mechanoid (leave vanilla's own overseer/bandwidth answer alone) or not mechanical at all.
 
                 if (!__instance.IsColonyMech)

@@ -22,6 +22,14 @@ namespace SapientMechanoidFix
     /// pawns Big and Small itself still considers mechanical (RaceHelper.IsMechanical) -
     /// a genuine mechanoid whose RaceProps.IsMechanoid is still true, or anything not
     /// mechanical at all, falls straight through to vanilla's own unmodified check.
+    ///
+    /// Vanilla's own "repairer must be a Mechanitor" restriction (enforced in
+    /// WorkGiver_RepairMech.ShouldSkip, not here) is left fully in place for sapient
+    /// mechs too - an earlier "allow any colonist" setting tried bypassing it, but
+    /// automatic (non-forced) repair assignment never actually worked even with every
+    /// vanilla gate confirmed passing (right-click forced repair did work correctly).
+    /// Root cause not found despite extensive investigation - see README Known Issues.
+    /// Removed rather than ship a setting that only partially works.
     /// </summary>
     [HarmonyPatch(typeof(WorkGiver_RepairMech), nameof(WorkGiver_RepairMech.HasJobOnThing))]
     public static class WorkGiver_RepairMech_HasJobOnThing_Patch
@@ -30,7 +38,7 @@ namespace SapientMechanoidFix
         {
             try
             {
-                if (t is not Pawn mech || mech.RaceProps.IsMechanoid || !mech.IsMechanical())
+                if (t is not Pawn mech || mech.RaceProps.IsMechanoid || !IsMechanicalCache.Get(mech))
                     return true; // Genuine mechanoid, or not mechanical by Big and Small's own reckoning either - vanilla handles it correctly as-is.
 
                 if (!ModLister.CheckBiotech("Repair mech"))

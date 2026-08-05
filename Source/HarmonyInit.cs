@@ -9,11 +9,12 @@ namespace SapientMechanoidFix
     {
         static HarmonyInit()
         {
-            var harmony = new Harmony("yorgrim.sapientmechanoidfix");
+            var harmony = new Harmony("lukinari.sapientmechanoidfix");
             try
             {
                 harmony.PatchAll();
                 OverseerGizmoSuppressionPatches.Apply(harmony);
+                AbilityOverseerGizmoPatches.Apply(harmony);
                 Log.Message("[SapientMechanoidFix] Patch applied.");
             }
             catch (Exception e)
