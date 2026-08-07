@@ -1,0 +1,2 @@
+1.0.1
+- Added: "Choose urchin design" gizmo for the War Queen and Alpha Mechs' War Empress - pick an [AV] Mechanoid Skins design once, and every urchin that mech summons afterward spawns with it already applied. Requires [AV] Mechanoid Skins. Off/on via a new mod setting, on by default.

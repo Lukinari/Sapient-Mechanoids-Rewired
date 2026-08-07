@@ -3,8 +3,8 @@
   <name>Sapient Mechanoids Rewired</name>
   <author>Lukinari</author>
   <packageId>Lukinari.SapientMechanoidFix</packageId>
-  <modVersion>1.0.0</modVersion>
-  <description>Fixes sapient mechanoids (Big and Small - Sapient Animals) losing mechanoid-only abilities and gizmos - e.g. a sapient War Queen (vanilla Biotech) or Work Queen ([AV] Framework) loses its steel reserve and urchin-release command. Two causes, both addressed: Big and Small's humanlike-ThingDef generator strips any ThingComp it doesn't recognize (this adds vanilla's and AV Framework's mech-queen comps, plus AV Framework's inspector tab, to its whitelist), and even with the comps restored, they only show their gizmos on a pawn whose RaceProps.IsMechanoid is true - which Big and Small deliberately clears for sapience. This patches Pawn.IsColonyMech so it also counts a pawn as a colony mech when Big and Small's own IsMechanical() marker says it still is, restoring that and anything else in other mods gated the same way. Does nothing unless Big and Small is active.</description>
+  <modVersion>1.0.1</modVersion>
+  <description>Big and Small - Sapient Animals turns a mechanoid into a sapient colonist by building it as a brand new race, only carrying over the things it's been told are safe. It just doesn't know about mech-only gear like a War Queen's steel reserve or urchin release, so those don't come along for the ride. This mod tells it they're safe and fixes the follow-up issues that come with restoring them, so your sapient mechanoids keep working like the real thing. Does nothing unless Big and Small is active.</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
