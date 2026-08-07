@@ -32,6 +32,10 @@ namespace SapientMechanoidFix
                 "Freeze Ascension Megacorp mechs' Readiness need",
                 ref Settings.freezeAscensionMegacorpReadiness,
                 "Ascension Megacorp mechs have their own \"Readiness\" need, refilled with Component Industrial, alongside their real vanilla energy bar (which a sapient mech never gets back, regardless of this setting, same as any other sapient mechanoid). Turning this on stops a sapient mech's Readiness from draining at all - the bar stays on its need list, but it never demands a component-resupply chore. Off by default, so it behaves like a normal need unless you opt out. Takes effect immediately, even on an existing save.");
+            listing.CheckboxLabeled(
+                "Let the War Queen and War Empress choose urchin designs (NEW FEATURE!)",
+                ref Settings.enableSummonedMechSkinChoice,
+                "Only does anything if [AV] Mechanoid Skins is also installed. Adds a \"Choose urchin design\" gizmo to the War Queen and Alpha Mechs' War Empress, letting you pick a design once so every urchin that mech summons afterward spawns with it already applied. Works the same whether the mech is sapient or real. On by default. Turning this off hides the gizmo and stops applying any design already chosen.\n\nThis one's newer than the rest of this mod's fixes and hasn't had the same length of testing yet. If anything about it misbehaves, turning this off is safe - it doesn't touch anything else this mod does, and existing urchins already spawned keep whatever design they already have either way.");
             listing.Gap();
             GameFont fontBefore = Text.Font;
             listing.CheckboxLabeled(

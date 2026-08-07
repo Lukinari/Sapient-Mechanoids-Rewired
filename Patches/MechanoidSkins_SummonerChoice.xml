@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <!--
+  Adds CompSummonedMechSkinChoice to the two mechs whose summoned urchins go through
+  vanilla's own RimWorld.CompMechCarrier (see CompMechCarrier_TrySpawnPawns_Patch.cs) -
+  the vanilla War Queen and Alpha Mechs' War Empress, which uses the exact same vanilla
+  comp rather than a custom one of its own. Entirely gated on Veltaris.MechanoidSkins
+  ([AV] Mechanoid Skins) - without it installed, neither Operation below ever runs, so
+  the comp is never added to either ThingDef and this feature is a complete no-op.
+  -->
+
+  <Operation Class="PatchOperationAdd" MayRequire="Ludeon.RimWorld.Biotech,Veltaris.MechanoidSkins">
+    <xpath>Defs/ThingDef[defName="Mech_Warqueen"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SummonedMechSkinChoice" />
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd" MayRequire="sarg.alphamechs,Veltaris.MechanoidSkins">
+    <xpath>Defs/ThingDef[defName="AM_WarEmpress"]/comps</xpath>
+    <value>
+      <li Class="SapientMechanoidFix.CompProperties_SummonedMechSkinChoice" />
+    </value>
+  </Operation>
+
+</Patch>

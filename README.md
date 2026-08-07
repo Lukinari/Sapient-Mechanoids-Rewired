@@ -59,7 +59,11 @@ If you also run *Ascension Megacorp*, its mechs keep working once made sapient: 
 
 ## Optional: Mechanoid Upgrades
 
-If you also run *Mechanoid Upgrades*, you can now walk a sapient mech into a Mech Upgrader building and install upgrades on it, the same as a real mechanoid - previously the option to do so didn't even show up. A sapient mech also can't be starved of a mechanitor's supervision and go feral the way a real uncontrolled mech would - it doesn't need one in the first place. Every individual upgrade type has now been checked - shielding, reactive armor, laser defence, the "spawn helper mech" upgrade, cosmetic add-ons, all work correctly on a sapient mech. Upgrades restricted to certain mech sizes or weight classes now correctly check the mech's real size and weight class too, rather than treating every sapient mech as plain human-sized. The one exception is aura-style upgrades that buff or heal nearby mechs - see Known issues.
+If you also run *Mechanoid Upgrades*, you can now walk a sapient mech into a Mech Upgrader building and install upgrades on it, the same as a real mechanoid - previously the option to do so didn't even show up. A sapient mech also can't be starved of a mechanitor's supervision and go feral the way a real uncontrolled mech would - it doesn't need one in the first place. Every individual upgrade type has now been checked - shielding, chips, various other upgrades, all work correctly on a sapient mech. Upgrades restricted to certain mech sizes or weight classes now correctly check the mech's real size and weight class too, rather than treating every sapient mech as plain human-sized. The one exception is aura-style upgrades that buff or heal nearby mechs - see Known issues.
+
+## Optional: [AV] Mechanoid Skins
+
+If you also run *[AV] Mechanoid Skins*, the War Queen and Alpha Mechs' War Empress get a "Choose urchin design" gizmo - pick a design once and every urchin that mech summons afterward spawns with that design already applied, instead of Mechanoid Skins' own random/rule-based pick. Isn't limited to designs actually curated for that urchin - a toggle in the picker lists every design Mechanoid Skins knows about, since each one is just a texture set and isn't technically tied to a specific mech. Works the same whether the summoner is sapient or a real, controlled mechanoid.
 
 ## Known issues
 
@@ -80,8 +84,9 @@ If you also run *Mechanoid Upgrades*, you can now walk a sapient mech into a Mec
 - **MAP Mechanoid Commander** - not looked at yet.
 - **Alpha Mechs' Lux** - its weapon's "warmup" toggle doesn't seem to do anything once sapient. Investigated and found nothing that looks sapience-specific about it, so the cause is still unclear - needs more testing to pin down.
 - **Ascension Megacorp's Deactivate button and paint job** - confirmed not working on a sapient mech. Not investigated yet.
-- **[AV] Mechanoid Skins** - adds cosmetic customization/skins for mechanoids, including [AV] Mechtech's. Not looked at yet.
+- **[AV] Mechanoid Skins** - choosing a design for a summoner's future urchins now works (see the Optional section above). A sapient mech picking a skin *for itself* is still unsupported - Big and Small substitutes its own render tree onto every sapient pawn during conversion, and AV Mechanoid Skins' own skin-changer gizmo only shows up on a pawn whose render tree still matches its own - not yet fixed.
 - **Ascension Megacorp** - Gonk, Omaha, and Paraman work but also lose their custom appearance once sapient, regardless of this mod, looking to fix. Cobalt and Rocky are unaffected.
+- **Vehicle Framework** - letting a sapient mechanoid drive vehicles. Not looked at yet.
 
 ## Mod settings
 
@@ -89,6 +94,7 @@ If you also run *Mechanoid Upgrades*, you can now walk a sapient mech into a Mec
 - **Allow resurrecting sapient mechs** (on by default) - lets mechanoid-resurrection abilities bring a dead sapient mech back, same as a real one. Turn off if you'd rather their death be permanent, like an ordinary colonist's.
 - **Fix sapient mech size and weight class** (on by default) - restores a sapient mech's real body size, health scale, and weight class instead of treating it as plain human-sized. Only matters to other mods that check a mech's size or weight class directly (like Mechanoid Upgrades' size-restricted upgrades) - takes effect on the next save load or new game, not immediately.
 - **Freeze Ascension Megacorp mechs' Readiness need** (off by default) - a real Ascension Megacorp mech has both a vanilla energy bar and its own component-refilled Readiness need; a sapient one never gets the energy bar back either way, same as any other sapient mechanoid, but this setting controls whether its Readiness need keeps draining. Turn on and a sapient mech's Readiness bar stops moving entirely - it stays on the need list but never demands a component-resupply chore. Takes effect immediately, even on an existing save with mechs that already have the need.
+- **Let the War Queen and War Empress choose urchin designs** (on by default) - only does anything if [AV] Mechanoid Skins is also installed. Adds the "Choose urchin design" gizmo described above. Turning this off hides the gizmo and stops applying any design already chosen, immediately, even on an existing save.
 - **Never re-check pawns already confirmed non-mechanical** (off by default) - skips future re-checks for a pawn once it's confirmed not mechanical, instead of periodically re-checking it in case some other mod later converts it (a gene, hediff, or apparel added mid-game). Safe to turn on if nothing in your mod list ever turns an organic pawn into a mechanical one - most of a colony is ordinary colonists, so this avoids rescanning them forever after the first check. Leave off if you're not sure, since a pawn converted after being cached as non-mechanical would permanently miss this mod's fixes. Every pawn's first-ever check is always given one refresh cycle before it's eligible to freeze, so a newly-converted or freshly-loaded mech that happens to fail its very first check still gets a chance to self-correct instead of getting stuck non-mechanical forever.
 - **IsMechanical cache refresh interval** (250 ticks by default) - most of this mod's patches ask "is this pawn one of ours" very often; the answer is cached per pawn for roughly this many ticks' worth of real time rather than recomputed every time - measured by the clock, not the game's simulated ticks, so it still elapses on schedule even while the game is paused. Raise this if you're running an unusually mechanoid-heavy colony and still seeing stutter - the tradeoff is this mod taking slightly longer to notice if a pawn's mechanical status ever genuinely changes, which in practice is rare. A pawn already confirmed mechanical is never re-checked regardless of this setting, since that status doesn't revert. With the setting above on, this still controls one thing: how long each pawn's first check is given to self-correct before it can freeze.
 
@@ -135,6 +141,7 @@ This mod only ever touches a pawn after Big and Small has converted it to sapien
 - **[AV] Mechtech** - Veltaris. Source of the mechanoid roster this mod restores compatibility for.
 - **Ascension Megacorp** - AobaKuma and contributors. Source of the mechanoid roster this mod restores compatibility for.
 - **Mechanoid Upgrades** - GoGaTio. Source of the upgrade framework this mod restores compatibility for.
+- **[AV] Mechanoid Skins** - Veltaris. The skin system behind the "Choose urchin design" gizmo.
 
 ## Development
 
@@ -143,8 +150,6 @@ Developed with AI assistance (Claude Code). Verified through extensive in-game t
 ## Source code
 
 [github.com/Lukinari/Sapient-Mechanoids-Rewired](https://github.com/Lukinari/Sapient-Mechanoids-Rewired)
-
-Forks and Steam Workshop reuploads are welcome - just link back to this repository so people can find updates and report issues in one place.
 
 ## License
 

@@ -65,6 +65,16 @@
            Pawn_IsColonyMechPlayerControlled_Patch.cs. -->
       <li>RimWorld.CompProperties_TurretGun</li>
 
+      <!-- Lets the player pick an [AV] Mechanoid Skins design for a summoner's future
+           urchins (War Queen, Alpha Mechs' War Empress - both use vanilla's own
+           CompMechCarrier) - see CompSummonedMechSkinChoice.cs,
+           CompMechCarrier_TrySpawnPawns_Patch.cs, and Patches/MechanoidSkins_
+           SummonerChoice.xml, which is what actually adds this comp to either ThingDef in
+           the first place, gated on Veltaris.MechanoidSkins. Works the same for a real or
+           sapient summoner - it only stores a preference and reacts to a vanilla method
+           neither sapience nor anything else in this mod touches. -->
+      <li>SapientMechanoidFix.CompProperties_SummonedMechSkinChoice</li>
+
       <!-- Reactive armor (steel-scaled damage reduction) - see
            CompSapientMechReactiveArmor.cs and Patches/ReactiveArmor.xml, which is what
            actually adds this comp to Mech_Warqueen/AV_Mech_Workerqueen in the first
