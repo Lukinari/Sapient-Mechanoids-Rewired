@@ -18,6 +18,8 @@ namespace SapientMechanoidFix
 
         public bool enableSummonedMechSkinChoice = true;
 
+        public bool enableSapientMechSkinChoice = false;
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -28,6 +30,7 @@ namespace SapientMechanoidFix
             Scribe_Values.Look(ref isMechanicalCacheRefreshTicks, "isMechanicalCacheRefreshTicks", 250);
             Scribe_Values.Look(ref freezeNonMechanicalCache, "freezeNonMechanicalCache", false);
             Scribe_Values.Look(ref enableSummonedMechSkinChoice, "enableSummonedMechSkinChoice", true);
+            Scribe_Values.Look(ref enableSapientMechSkinChoice, "enableSapientMechSkinChoice", false);
         }
     }
 }

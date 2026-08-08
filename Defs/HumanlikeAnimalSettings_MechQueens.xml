@@ -75,6 +75,15 @@
            neither sapience nor anything else in this mod touches. -->
       <li>SapientMechanoidFix.CompProperties_SummonedMechSkinChoice</li>
 
+      <!-- [AV] Mechanoid Skins' own comp - patched onto BaseMechanoid itself, so the War
+           Queen's real ThingDef already carries it natively, but like everything else not
+           on this list it gets silently dropped when Big and Small builds the sapient
+           clone. Whitelisting it alone isn't enough for the comp's own gizmo to work - see
+           renderTreeWhitelist below and Defs/MechanoidSkins_RenderTree.xml for why a sapient
+           mech needs its own render tree to use it at all. Harmless without [AV] Mechanoid
+           Skins installed, same as this file's other optional-mod entries. -->
+      <li>AV_MechanoidSkins.CompProperties_MechanoidSkin</li>
+
       <!-- Reactive armor (steel-scaled damage reduction) - see
            CompSapientMechReactiveArmor.cs and Patches/ReactiveArmor.xml, which is what
            actually adds this comp to Mech_Warqueen/AV_Mech_Workerqueen in the first
@@ -504,6 +513,23 @@
          is unaffected by this revert and stays in place. Lady's head texture is still
          unsolved as of this revert - restoring it needs a fix that doesn't touch which
          render tree she uses at all. -->
+
+    <!-- Unlike Lady's case above, this DOES register a custom render tree - but it's this
+         mod's own tree (SapientMechanoidFix_MechSkinRenderTree, see Defs/MechanoidSkins_
+         RenderTree.xml), which mirrors BS_HumanlikeAnimal's shape and only swaps in a
+         subclass of Big and Small's own humanlike-safe body node, not [AV] Mechanoid Skins'
+         animal-only one - see that file for the full reasoning. MayRequire matches the tree
+         def's own gating exactly - without both Biotech and [AV] Mechanoid Skins, this
+         entry must never load, since DefDatabase<PawnRenderTreeDef>.GetNamed would throw
+         looking for a tree that doesn't exist. -->
+    <renderTreeWhitelist>
+      <li MayRequire="Ludeon.RimWorld.Biotech,Veltaris.MechanoidSkins">
+        <thingDefNames>
+          <li>Mech_Warqueen</li>
+        </thingDefNames>
+        <renderTreeDefName>SapientMechanoidFix_MechSkinRenderTree</renderTreeDefName>
+      </li>
+    </renderTreeWhitelist>
   </BigAndSmall.HumanlikeAnimalSettings>
 
 </Defs>

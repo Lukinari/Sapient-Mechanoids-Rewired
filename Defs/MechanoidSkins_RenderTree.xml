@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <!--
+  A sapient mech can't use [AV] Mechanoid Skins' own skin-changer gizmo, because that gizmo
+  only appears on a pawn whose render tree still matches AV_MechSkinsRenderTree (or one
+  tagged compatible via its own HasSkinCompatibleRendertree mod extension) - and Big and
+  Small always substitutes its own BS_HumanlikeAnimal tree onto every sapient pawn during
+  conversion (HumanlikeAnimalGenerator.SetRenderTree), so that check always fails.
+
+  Forcing AV_MechSkinsRenderTree itself back on hits the same crash already found and
+  reverted for Lady's original "HumanlikeMech" tree (see HumanlikeAnimalSettings_MechQueens.
+  xml): AV Mechanoid Skins' own body node, PawnRenderNode_MechanoidSkin, extends
+  PawnRenderNode_AnimalPart and calls Pawn.ageTracker.CurKindLifeStage directly, which
+  throws for a pawn Big and Small has also made RaceProps.Humanlike - confirmed by
+  decompile, not just by analogy.
+
+  This tree instead mirrors BS_HumanlikeAnimal's own shape - every other node is still Big
+  and Small's own class, unchanged (Wounds/Pack/Firefoam/Carried) - and only swaps the Body
+  node's class for SapientMechanoidFix.PawnRenderNode_SapientMechSkin, a subclass of Big and
+  Small's own PawnRenderNode_HAnimalBody (the humanlike-safe body node BS_HumanlikeAnimal
+  itself already uses, which resolves its graphic through Big and Small's own
+  original-animal-kindDef lookup instead of ageTracker, sidestepping the crash entirely). It
+  defers to Big and Small's own graphic resolution first and only overlays an [AV] Mechanoid
+  Skins design on top if the pawn has one chosen - see PawnRenderNode_SapientMechSkin.cs and
+  MechanoidSkinRenderSupport.cs.
+
+  Registered onto specific mechs (currently just the War Queen) via renderTreeWhitelist in
+  HumanlikeAnimalSettings_MechQueens.xml - scoped per-ThingDef, not a global substitution,
+  so a mistake here can't take down every pawn's rendering the way forcing a tree globally
+  once did. The HasSkinCompatibleRendertree mod extension below is [AV] Mechanoid Skins' own
+  documented mechanism for a foreign render tree to declare itself capable of applying a
+  skin on its own - exactly this situation.
+
+  MayRequire means this whole def is entirely inert without [AV] Mechanoid Skins installed -
+  nothing anywhere ever references it in that case.
+  -->
+  <PawnRenderTreeDef MayRequire="Veltaris.MechanoidSkins">
+    <defName>SapientMechanoidFix_MechSkinRenderTree</defName>
+    <modExtensions>
+      <li Class="AV_MechanoidSkins.HasSkinCompatibleRendertree">
+        <IsSkinCompatible>true</IsSkinCompatible>
+      </li>
+    </modExtensions>
+    <root Class="PawnRenderNodeProperties_Parent">
+      <debugLabel>Root</debugLabel>
+      <tagDef>Root</tagDef>
+      <children>
+        <li>
+          <debugLabel>Body</debugLabel>
+          <tagDef>Body</tagDef>
+          <nodeClass>SapientMechanoidFix.PawnRenderNode_SapientMechSkin</nodeClass>
+          <workerClass>BigAndSmall.PawnRenderNodeWorker_HumanlikeAnimalBody</workerClass>
+          <useRottenColor>true</useRottenColor>
+          <children>
+            <li>
+              <debugLabel>Wounds</debugLabel>
+              <nodeClass>BigAndSmall.PawnRenderNode_HAnimalPart</nodeClass>
+              <workerClass>PawnRenderNodeWorker_OverlayWounds</workerClass>
+              <overlayLayer>Body</overlayLayer>
+              <useGraphic>false</useGraphic>
+              <pawnType>Any</pawnType>
+              <baseLayer>3</baseLayer>
+            </li>
+            <li>
+              <debugLabel>Pack</debugLabel>
+              <nodeClass>BigAndSmall.PawnRenderNode_HAnimalPack</nodeClass>
+              <workerClass>BigAndSmall.PawnRenderNodeWorker_HAnimalPack</workerClass>
+              <rotDrawMode>Fresh, Rotting</rotDrawMode>
+              <pawnType>Any</pawnType>
+              <baseLayer>5</baseLayer>
+            </li>
+            <li>
+              <debugLabel>Firefoam</debugLabel>
+              <nodeClass>BigAndSmall.PawnRenderNode_HAnimalPart</nodeClass>
+              <workerClass>PawnRenderNodeWorker_OverlayFirefoam</workerClass>
+              <overlayLayer>Body</overlayLayer>
+              <useGraphic>false</useGraphic>
+              <pawnType>Any</pawnType>
+              <baseLayer>10</baseLayer>
+            </li>
+          </children>
+        </li>
+        <li Class="PawnRenderNodeProperties_Carried">
+          <debugLabel>Carried thing</debugLabel>
+          <workerClass>PawnRenderNodeWorker_Carried</workerClass>
+          <pawnType>Any</pawnType>
+        </li>
+      </children>
+    </root>
+  </PawnRenderTreeDef>
+
+</Defs>

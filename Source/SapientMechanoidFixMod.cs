@@ -36,6 +36,10 @@ namespace SapientMechanoidFix
                 "Let the War Queen and War Empress choose urchin designs (NEW FEATURE!)",
                 ref Settings.enableSummonedMechSkinChoice,
                 "Only does anything if [AV] Mechanoid Skins is also installed. Adds a \"Choose urchin design\" gizmo to the War Queen and Alpha Mechs' War Empress, letting you pick a design once so every urchin that mech summons afterward spawns with it already applied. Works the same whether the mech is sapient or real. On by default. Turning this off hides the gizmo and stops applying any design already chosen.\n\nThis one's newer than the rest of this mod's fixes and hasn't had the same length of testing yet. If anything about it misbehaves, turning this off is safe - it doesn't touch anything else this mod does, and existing urchins already spawned keep whatever design they already have either way.");
+            listing.CheckboxLabeled(
+                "Let a sapient War Queen use her own [AV] Mechanoid Skins design (WIP - DO NOT TOUCH)",
+                ref Settings.enableSapientMechSkinChoice,
+                "Only does anything if [AV] Mechanoid Skins is also installed. Lets a sapient War Queen use Mechanoid Skins' own skin-changer gizmo on herself, the same as a real one can - previously impossible, since Big and Small always substitutes its own render tree onto a sapient pawn and Mechanoid Skins' gizmo only shows up on a tree it recognizes. Turning this off (or leaving it off) reverts her to Big and Small's default sapient appearance immediately, even on an existing save, and hides Mechanoid Skins' own skin-changer gizmo on her too.\n\nWork in progress, off by default: the gizmo opens and lets you pick a design, but every option in the list currently shows a blank preview instead of the actual design - not yet fixed, and not yet confirmed whether the applied result itself is affected. Doesn't touch anything else this mod does either way, and doesn't affect the urchin-design setting above.");
             listing.Gap();
             GameFont fontBefore = Text.Font;
             listing.CheckboxLabeled(

@@ -40,23 +40,43 @@ namespace SapientMechanoidFix
             }
         }
 
-        public static void Postfix(CompMechCarrier __instance, int __state)
+        /// <summary>
+        /// A Finalizer, not a Postfix - confirmed from a real crash log that vanilla's own
+        /// TrySpawnPawns() can throw a NullReferenceException partway through a multi-pawn
+        /// spawn batch. It snapshots innerContainer's contents into tmpResources once before
+        /// the spawn loop; if the steel needed is split across multiple stacks, spawning an
+        /// earlier pawn in the same batch can fully consume a stack that snapshot still
+        /// references, so a later pawn's ingredient-consumption loop calls
+        /// innerContainer.Take() on an already-gone Thing and gets null back, then
+        /// dereferences it. Pure vanilla bug, nothing to do with sapience - happens for any
+        /// War Queen spawning more than one urchin per click with split steel stacks.
+        ///
+        /// A plain Postfix never runs when the original method throws, which silently
+        /// skipped skin application even for pawns that DID successfully spawn before the
+        /// crash point (they're already in spawnedPawns by then - see vanilla's own
+        /// spawnedPawns.Add(pawn), which happens before the crash-prone ingredient loop for
+        /// that same iteration). A Finalizer runs regardless of whether the original threw,
+        /// so those already-spawned pawns still get their chosen skin. Returning __exception
+        /// unchanged means this doesn't swallow or alter the crash itself in any way - it's
+        /// purely a "still do our part" fix, not an attempt to fix vanilla's own bug.
+        /// </summary>
+        public static Exception Finalizer(CompMechCarrier __instance, int __state, Exception __exception)
         {
             try
             {
                 if (!SummonedMechSkinChoiceSupport.IsAvailable)
-                    return;
+                    return __exception;
 
                 if (SapientMechanoidFixMod.Settings?.enableSummonedMechSkinChoice != true)
-                    return;
+                    return __exception;
 
                 CompSummonedMechSkinChoice skinChoice = __instance.parent?.GetComp<CompSummonedMechSkinChoice>();
                 if (skinChoice?.chosenSkin == null)
-                    return;
+                    return __exception;
 
                 List<Pawn> spawnedPawns = SpawnedPawnsRef(__instance);
                 if (spawnedPawns == null)
-                    return;
+                    return __exception;
 
                 for (int i = __state; i < spawnedPawns.Count; i++)
                     SummonedMechSkinChoiceSupport.ApplySkin(spawnedPawns[i], skinChoice.chosenSkin);
@@ -65,6 +85,8 @@ namespace SapientMechanoidFix
             {
                 Log.ErrorOnce("[SapientMechanoidFix] Applying chosen urchin skin failed: " + e, 91274552);
             }
+
+            return __exception;
         }
     }
 }
