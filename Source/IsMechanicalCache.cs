@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using BigAndSmall;
 using UnityEngine;
@@ -60,6 +61,23 @@ namespace SapientMechanoidFix
     /// mechanoid's first-ever check landing on `false` gets one guaranteed recheck before
     /// it can stick permanently.
     ///
+    /// IsMechanical() can also throw outright rather than returning a value: observed in a
+    /// player log as a NullReferenceException raised inside BigAndSmall.ModExtHelper.
+    /// ExtensionsOnDef, reached through GetAllPawnExtensions, for one particular pawn. The
+    /// throw is caught here rather than left to each calling patch's own guard, because the
+    /// original shape of this method only wrote a cache entry once IsMechanical() had
+    /// returned - so a pawn that made it throw was never cached at all, and every subsequent
+    /// call re-entered Big and Small and threw again. Since the callers include members read
+    /// for every pawn every frame, that meant an exception throw plus a full Harmony stack
+    /// walk per call, indefinitely, while the mod's own Log.ErrorOnce reported it a single
+    /// time and hid how often it was really firing.
+    ///
+    /// A throw is therefore treated as "not mechanical" and cached like any other result, so
+    /// the cost is bounded to one throw per refresh window instead of one per call. The entry
+    /// is deliberately left unconfirmed: a failure is not evidence about the pawn, so it must
+    /// never become eligible for the freezeNonMechanicalCache shortcut, or a transient fault
+    /// inside another mod would permanently mark a genuinely mechanical pawn as organic.
+    ///
     /// The refresh window is measured against Time.realtimeSinceStartup (real wall-clock
     /// seconds), not Find.TickManager.TicksGame - confirmed via a real bug: TicksGame
     /// freezes entirely while the game is paused, so a wrong `false` cached the moment
@@ -106,15 +124,47 @@ namespace SapientMechanoidFix
                 if (now - entry.ComputedRealTime < RefreshIntervalSeconds)
                     return false; // Not due for a recheck yet - including the grace period before a first `false` can freeze.
 
-                entry.Value = pawn.IsMechanical();
+                bool evaluated = TryEvaluate(pawn, out bool refreshed);
+
+                entry.Value = refreshed;
+
+                // Stamped even when the evaluation threw - that's what bounds a throwing pawn
+                // to one exception per refresh window rather than one per call.
                 entry.ComputedRealTime = now;
-                entry.Confirmed = true;
+
+                // Only a real answer confirms the entry. A throw leaves it unconfirmed so it
+                // can never be frozen by freezeNonMechanicalCache.
+                if (evaluated)
+                    entry.Confirmed = true;
+
                 return entry.Value;
             }
 
-            bool result = pawn.IsMechanical();
+            TryEvaluate(pawn, out bool result);
             Cache.Add(pawn, new Entry { Value = result, ComputedRealTime = Time.realtimeSinceStartup, Confirmed = false });
             return result;
+        }
+
+        /// <summary>
+        /// Calls Big and Small's IsMechanical, reporting whether it produced an answer at all.
+        /// Returns false with <paramref name="result"/> set to false when it throws, so the
+        /// caller can cache the fallback without ever treating it as a confirmed result.
+        /// </summary>
+        private static bool TryEvaluate(Pawn pawn, out bool result)
+        {
+            try
+            {
+                result = pawn.IsMechanical();
+                return true;
+            }
+            catch (Exception e)
+            {
+                result = false;
+                Log.ErrorOnce("[SapientMechanoidFix] Big and Small's IsMechanical threw for " +
+                              (pawn.def?.defName ?? "an unknown pawn") + " - treating it as non-mechanical " +
+                              "and caching that, so the check is not retried on every call: " + e, 91274567);
+                return false;
+            }
         }
     }
 }

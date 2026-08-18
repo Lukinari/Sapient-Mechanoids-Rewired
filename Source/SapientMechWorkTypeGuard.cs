@@ -36,5 +36,29 @@ namespace SapientMechanoidFix
             if (pawn != null)
                 suppressed.Remove(pawn);
         }
+
+        /// <summary>
+        /// Suppresses <paramref name="pawn"/> only if it is a Big and Small sapient mechanoid
+        /// currently being reported as a colony mech, returning whether it did - so a caller can
+        /// unsuppress exactly what it suppressed and nothing else. A real mechanoid is never
+        /// touched: its mech-only restrictions are correct and must stay.
+        ///
+        /// Safe to nest. The IsColonyMech read below goes through Pawn_IsColonyMech_Patch, which
+        /// already honours suppression - so if an outer patch has this pawn suppressed, that read
+        /// returns the real (false) value and this bails out without suppressing or, more
+        /// importantly, without reporting a suppression the caller would later undo out from
+        /// under the outer one.
+        /// </summary>
+        public static bool TrySuppress(Pawn pawn)
+        {
+            if (pawn == null || pawn.RaceProps.IsMechanoid || !IsMechanicalCache.Get(pawn))
+                return false;
+
+            if (!pawn.IsColonyMech)
+                return false;
+
+            Suppress(pawn);
+            return true;
+        }
     }
 }
